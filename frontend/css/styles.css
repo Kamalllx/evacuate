@@ -1,0 +1,197 @@
+/* Main layout styles */
+.main-container {
+    min-height: calc(100vh - 200px);
+}
+
+/* Hero section styling */
+.hero-section {
+    position: relative;
+    height: 300px;
+    background-image: url('https://pixabay.com/get/g66c5bc3ece77864a8f014314d3b2996109373734022d52fd07b6aa7e8cef15f2a8774fd06486be7c79e5046d886b6eae4426b1ad78b966a1bdd02162499b43ae_1280.jpg');
+    background-size: cover;
+    background-position: center;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    margin-top: 1rem;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+/* Map containers */
+#map, #simulationMap {
+    width: 100%;
+    height: 600px;
+    z-index: 1;
+}
+
+/* Emergency mode styles */
+.emergency-mode header {
+    background-color: #dc3545 !important;
+}
+
+.emergency-mode .navbar-brand {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+/* Make search results appear above map */
+#searchResults {
+    position: absolute;
+    z-index: 1000;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+/* Custom map marker colors */
+.start-marker i {
+    color: #28a745;
+}
+
+.end-marker i {
+    color: #dc3545;
+}
+
+.blockage-marker i {
+    color: #fd7e14;
+}
+
+/* Route info styles */
+.route-segment {
+    padding: 0.5rem;
+    border-left: 3px solid #007bff;
+    margin-bottom: 0.5rem;
+}
+
+/* Custom leaflet controls */
+.custom-leaflet-control {
+    background-color: #343a40;
+    padding: 5px;
+    border-radius: 4px;
+    color: white;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .hero-section {
+        height: 200px;
+    }
+    
+    #map, #simulationMap {
+        height: 400px;
+    }
+    
+    .card-title {
+        font-size: 1rem;
+    }
+    
+    .card-text {
+        font-size: 0.9rem;
+    }
+}
+
+/* Simulation agent style */
+.agent {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #007bff;
+    border: 1px solid white;
+}
+
+.agent-emergency {
+    background-color: #dc3545;
+}
+
+/* Tooltip styles */
+.tooltip-custom {
+    background-color: #343a40;
+    border: 1px solid #6c757d;
+    border-radius: 5px;
+    padding: 10px;
+    color: white;
+    max-width: 200px;
+}
+
+/* Scenario card styles */
+.scenario-card {
+    transition: transform 0.2s;
+}
+
+.scenario-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Animation for route calculation */
+@keyframes routeAnimation {
+    from {
+        stroke-dashoffset: 1000;
+    }
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+.route-animation {
+    animation: routeAnimation 2s linear forwards;
+    stroke-dasharray: 10;
+}
+
+/* Loading indicator */
+.loading-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    color: white;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
