@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import type { Map, MapboxGeoJSONFeature } from 'mapbox-gl';
+import TerrainVisualization from './TerrainVisualization';
+import TrafficVisualization from './TrafficVisualization';
 
 // Types
 interface MapComponentProps {
@@ -8,7 +10,8 @@ interface MapComponentProps {
 }
 
 // In a production app, this would be stored in .env.local
-// and accessed via process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
+// Normally we would use process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
+// This line would be replaced with a proper API key when provided by user
 const MAPBOX_ACCESS_TOKEN = 'YOUR_MAPBOX_TOKEN';
 
 const MapComponent: React.FC<MapComponentProps> = ({ isEmergencyMode }) => {
@@ -22,7 +25,11 @@ const MapComponent: React.FC<MapComponentProps> = ({ isEmergencyMode }) => {
   const [isSettingStart, setIsSettingStart] = useState(false);
   const [isSettingEnd, setIsSettingEnd] = useState(false);
   const [currentRoute, setCurrentRoute] = useState<any>(null);
+  const [routeCoordinates, setRouteCoordinates] = useState<number[][]>([]);
   const [trafficDensity, setTrafficDensity] = useState<any>(null);
+  const [boundingBox, setBoundingBox] = useState<number[][]>([]);
+  const [showTerrain, setShowTerrain] = useState(true);
+  const [showTraffic, setShowTraffic] = useState(true);
 
   // Initialize map when component mounts
   useEffect(() => {
@@ -196,6 +203,36 @@ const MapComponent: React.FC<MapComponentProps> = ({ isEmergencyMode }) => {
       }
     });
 
+    // Extract route coordinates for terrain visualization and traffic analysis
+    if (routeData.features && routeData.features.length > 0 && 
+        routeData.features[0].geometry && routeData.features[0].geometry.coordinates) {
+      const coordinates = routeData.features[0].geometry.coordinates;
+      setRouteCoordinates(coordinates);
+      
+      // Create bounding box for traffic analysis
+      // Find min and max coordinates to create a bounding box
+      if (coordinates.length > 0) {
+        let minLng = coordinates[0][0];
+        let maxLng = coordinates[0][0];
+        let minLat = coordinates[0][1];
+        let maxLat = coordinates[0][1];
+        
+        coordinates.forEach((coord: [number, number]) => {
+          minLng = Math.min(minLng, coord[0]);
+          maxLng = Math.max(maxLng, coord[0]);
+          minLat = Math.min(minLat, coord[1]);
+          maxLat = Math.max(maxLat, coord[1]);
+        });
+        
+        // Add a small buffer around the route (0.01 degrees ~ 1km)
+        const buffer = 0.01;
+        setBoundingBox([
+          [minLng - buffer, minLat - buffer], // Southwest corner
+          [maxLng + buffer, maxLat + buffer]  // Northeast corner
+        ]);
+      }
+    }
+
     // Fit the map to show the route
     const bounds = new mapboxgl.LngLatBounds();
     routeData.features[0].geometry.coordinates.forEach((coordinate: [number, number]) => {
@@ -256,6 +293,8 @@ const MapComponent: React.FC<MapComponentProps> = ({ isEmergencyMode }) => {
   return (
     <div>
       <div ref={mapContainer} className="map-container" style={{ height: '600px' }} />
+      
+      {/* Map Controls */}
       <div className="map-controls mt-3">
         <div className="d-flex justify-content-center mb-3">
           <button 
@@ -278,11 +317,81 @@ const MapComponent: React.FC<MapComponentProps> = ({ isEmergencyMode }) => {
             <i className="fas fa-route"></i> Calculate Route
           </button>
         </div>
+        
+        {/* Visualization Toggles */}
+        <div className="d-flex justify-content-center mb-3">
+          <div className="form-check form-switch mx-3">
+            <input 
+              className="form-check-input" 
+              type="checkbox" 
+              id="terrainToggle" 
+              checked={showTerrain}
+              onChange={() => setShowTerrain(!showTerrain)} 
+            />
+            <label className="form-check-label" htmlFor="terrainToggle">
+              <i className="fas fa-mountain me-1"></i> Terrain
+            </label>
+          </div>
+          <div className="form-check form-switch mx-3">
+            <input 
+              className="form-check-input" 
+              type="checkbox" 
+              id="trafficToggle" 
+              checked={showTraffic}
+              onChange={() => setShowTraffic(!showTraffic)} 
+            />
+            <label className="form-check-label" htmlFor="trafficToggle">
+              <i className="fas fa-car me-1"></i> Traffic
+            </label>
+          </div>
+        </div>
+        
         <div className="map-instructions text-center mb-3">
           {isSettingStart && <div className="alert alert-info">Click on the map to set start point</div>}
           {isSettingEnd && <div className="alert alert-info">Click on the map to set end point</div>}
         </div>
       </div>
+      
+      {/* Visualizations */}
+      {currentRoute && (
+        <div className="visualizations mt-4">
+          <div className="row">
+            {/* Terrain Visualization */}
+            {showTerrain && (
+              <div className="col-md-6 mb-3">
+                <div className="card border-0 shadow-sm">
+                  <div className="card-body">
+                    <TerrainVisualization 
+                      mapInstance={map.current} 
+                      routeCoordinates={routeCoordinates} 
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Traffic Visualization */}
+            {showTraffic && boundingBox.length > 0 && (
+              <div className="col-md-6 mb-3">
+                <div className="card border-0 shadow-sm">
+                  <div className="card-body">
+                    <h5>Traffic Conditions</h5>
+                    <TrafficVisualization 
+                      mapInstance={map.current} 
+                      boundingBox={boundingBox}
+                      isEnabled={showTraffic} 
+                    />
+                    <p className="text-muted mt-2">
+                      <i className="fas fa-info-circle me-1"></i> 
+                      Real-time traffic data along your route is shown on the map with color-coded congestion levels.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
