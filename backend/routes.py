@@ -67,7 +67,6 @@ def register_routes(app):
             
             payload = {
                 'coordinates': coordinates,
-                'profile': profile,
                 'format': 'geojson'
             }
             
@@ -76,9 +75,9 @@ def register_routes(app):
                     'avoid_polygons': avoid_polygons
                 }
             
-            # Make request to OpenRouteService
+            # Make request to OpenRouteService with the specific profile in the URL
             response = requests.post(
-                f"{ORS_BASE_URL}/directions",
+                f"{ORS_BASE_URL}/directions/{profile}/json",
                 headers=ors_headers,
                 json=payload
             )
