@@ -1,0 +1,125 @@
+/* Bootstrap CSS (Replit theme) */
+@import url('https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css');
+/* Font Awesome for icons */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+
+/* Main layout styles */
+.main-container {
+  min-height: calc(100vh - 200px);
+}
+
+/* Hero section styling */
+.hero-section {
+  position: relative;
+  height: 300px;
+  background-image: url('https://pixabay.com/get/g66c5bc3ece77864a8f014314d3b2996109373734022d52fd07b6aa7e8cef15f2a8774fd06486be7c79e5046d886b6eae4426b1ad78b966a1bdd02162499b43ae_1280.jpg');
+  background-size: cover;
+  background-position: center;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+/* Map container */
+.map-container {
+  width: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Start and end markers */
+.start-marker i {
+  font-size: 24px;
+  color: #28a745;
+}
+
+.end-marker i {
+  font-size: 24px;
+  color: #dc3545;
+}
+
+/* Emergency mode styles */
+.emergency-mode header {
+  background-color: #dc3545 !important;
+}
+
+.emergency-mode .navbar-brand {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Loading state */
+.loading-map {
+  height: 600px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #343a40;
+  color: white;
+  font-size: 1.2rem;
+}
+
+/* Route animation */
+@keyframes routeAnimation {
+  from {
+    stroke-dashoffset: 1000;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.route-animation {
+  animation: routeAnimation 2s linear forwards;
+  stroke-dasharray: 10;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .hero-section {
+    height: 200px;
+  }
+  
+  .map-container {
+    height: 400px !important;
+  }
+  
+  .card-title {
+    font-size: 1rem;
+  }
+  
+  .card-text {
+    font-size: 0.9rem;
+  }
+}
