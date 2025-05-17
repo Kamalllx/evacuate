@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
-import { Search, LocateFixed, Navigation2, Car, PersonStanding, Trash2, Calculator } from "lucide-react"
+import { Search, LocateFixed, Navigation2, Car, PersonStanding, Trash2, Calculator, Compass } from "lucide-react"
 import { useMode } from "../context/mode-context"
 import { motion } from "framer-motion"
 
@@ -148,6 +148,83 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
     toast.info("Route Cleared", {
       description: "The route has been cleared from the map.",
     })
+  }
+
+  const calculateDestinations = (start: [number, number]): [number, number][] => {
+    const [lat, lon] = start;
+    const destinations: [number, number][] = [];
+    const distance = 0.009; // Approx 1km in latitude/longitude degrees
+
+    for (let i = 0; i < 8; i++) {
+      const angle = (i * 45) * (Math.PI / 180); // 45 degrees apart (360/8)
+      const destLat = lat + distance * Math.cos(angle);
+      const destLon = lon + distance * Math.sin(angle);
+      destinations.push([destLat, destLon]);
+    }
+
+    return destinations;
+  };
+
+  const handleQuickEvac = async () => {
+    if (!startPoint) {
+      toast.error("Start point not set", {
+        description: "Please set a start point before using Quick Evac.",
+      });
+      return;
+    }
+  
+    setLoading(true);
+    try {
+      const destinations = calculateDestinations(startPoint);
+      const routes = await Promise.all(
+        destinations.map(dest =>
+          getDirections(
+            [
+              [startPoint[1], startPoint[0]],
+              [dest[1], dest[0]],
+            ],
+            blockages.length > 0
+              ? {
+                  type: "MultiPolygon",
+                  coordinates: blockages.map((b) => [b.coords.map(([lat, lng]) => [lng, lat])]),
+                }
+              : undefined,
+            travelMode
+          )
+        )
+      );
+      
+      // Create a properly formatted combined FeatureCollection with only route features
+      const combinedRoutes = {
+        type: "FeatureCollection",
+        features: []
+      };
+      
+      // Extract all routing features from each route response
+      routes.forEach(route => {
+        if (route && route.features && Array.isArray(route.features)) {
+          // Find the route feature (usually has "LineString" geometry)
+          const routeFeature = route.features.find(
+            feature => feature.geometry && feature.geometry.type === "LineString"
+          );
+          if (routeFeature) {
+            combinedRoutes.features.push(routeFeature);
+          }
+        }
+      });
+      
+      setRouteData(combinedRoutes);
+      toast.success("Quick Evac Routes", {
+        description: "8 evacuation routes have been calculated in different directions.",
+      });
+    } catch (error) {
+      console.error("Quick Evac error:", error);
+      toast.error("Quick Evac Error", {
+        description: "Unable to calculate evacuation routes. Please try again.",
+      });
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -304,6 +381,19 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                 <Calculator className="h-4 w-4 mr-2" />
               )}
               Calculate Route
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleQuickEvac}
+              disabled={loading || !startPoint}
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white border-0"
+            >
+              {loading ? (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2" />
+              ) : (
+                <Compass className="h-4 w-4 mr-2" />
+              )}
+              Quick Evac
             </Button>
             <Button
               variant="outline"
