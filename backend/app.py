@@ -1,17 +1,14 @@
 import os
 import logging
-from flask import Flask, jsonify, request, render_template, send_from_directory
+from flask import Flask, jsonify
 from flask_cors import CORS
 
 logging.basicConfig(level=logging.DEBUG)
 
 # Create Flask app
-app = Flask(__name__, 
-            static_folder="../frontend",
-            template_folder="../frontend")
+app = Flask(__name__)
 
 # Set secret key from environment variable
-app.secret_key = os.environ.get("SESSION_SECRET")
 
 # Configure CORS to allow requests from frontend
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -19,15 +16,6 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 # Import routes after app creation to avoid circular imports
 from backend.routes import register_routes
 register_routes(app)
-
-# Serve frontend
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/<path:path>')
-def serve_static(path):
-    return send_from_directory('../frontend', path)
 
 # Error handlers
 @app.errorhandler(404)
