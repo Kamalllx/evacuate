@@ -1,0 +1,193 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Ensure Leaflet styles are properly loaded */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  background-color: #1e293b !important;
+}
+
+.leaflet-control-container .leaflet-top,
+.leaflet-control-container .leaflet-bottom {
+  z-index: 900;
+}
+
+/* Custom animations */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.route-path {
+  stroke-dasharray: 10;
+  animation: dash 30s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: 1000;
+  }
+}
+
+/* Map mode transitions */
+.leaflet-container {
+  transition: background-color 0.5s ease;
+}
+
+/* Custom marker styles */
+.custom-marker-icon {
+  background: transparent;
+  border: none;
+}
+
+.marker-pin {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: bottom center;
+  animation: marker-drop 0.5s ease-out;
+}
+
+.marker-pin svg {
+  width: 100%;
+  height: 100%;
+}
+
+.start-pin {
+  color: #10b981;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.end-pin {
+  color: #ef4444;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.marker-pin:hover {
+  transform: scale(1.2);
+  transition: transform 0.2s ease;
+}
+
+@keyframes marker-drop {
+  0% {
+    transform: translateY(-50px) scale(0.5);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(10px) scale(1.2);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Glass morphism effects */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Pulse animation for active elements */
+.pulse-animation {
+  animation: pulse 2s infinite;
+}
+
+/* Improved scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.8);
+}
+
+/* Tooltip improvements */
+.leaflet-tooltip {
+  background: rgba(15, 23, 42, 0.8) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 4px !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  padding: 8px 12px !important;
+  font-size: 12px !important;
+}
+
+.leaflet-tooltip-top:before {
+  border-top-color: rgba(15, 23, 42, 0.8) !important;
+}
+
+.leaflet-tooltip-bottom:before {
+  border-bottom-color: rgba(15, 23, 42, 0.8) !important;
+}
+
+.leaflet-tooltip-left:before {
+  border-left-color: rgba(15, 23, 42, 0.8) !important;
+}
+
+.leaflet-tooltip-right:before {
+  border-right-color: rgba(15, 23, 42, 0.8) !important;
+}

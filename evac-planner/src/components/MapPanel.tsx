@@ -1,39 +1,94 @@
-import React, { useEffect } from 'react';
-import { MapContainer, TileLayer } from 'react-leaflet';
-import MapView from './MapView';
-import Legend from './Legend';
+"use client"
+import { useEffect, useRef } from "react"
+import { MapContainer, TileLayer, ZoomControl } from "react-leaflet"
+import MapView from "./MapView"
+import Legend from "./Legend"
+import MapControls from "./MapControls"
+import ModeSelector from "./ModelSelector"
+import { useMode } from "../context/mode-context"
+import { motion } from "framer-motion"
+import L from "leaflet"
 
-const defaultCenter = [40.7128, -74.0060];
-
-const MAP_ID = 'main-map';
+const defaultCenter = [40.7128, -74.006]
+const MAP_ID = "main-map"
 
 const MapPanel = (props) => {
+  const mapRef = useRef(null)
+  const { mode } = useMode()
+
+  // Fix Leaflet icon issues
+  useEffect(() => {
+    // This is needed for the Leaflet icons to work properly
+    delete L.Icon.Default.prototype._getIconUrl
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+      iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+      shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+    })
+  }, [])
+
   useEffect(() => {
     // This ensures the Leaflet map instance is destroyed before mounting a new one
-    const container = document.getElementById(MAP_ID);
+    const container = document.getElementById(MAP_ID)
     if (container && container._leaflet_id) {
-      container._leaflet_id = null;
+      container._leaflet_id = null
     }
-  }, []);
+  }, [])
+
+  // Get map style based on current mode
+  const getMapStyle = () => {
+    switch (mode) {
+      case "heatmap":
+        return "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+      case "defense":
+        return "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+      case "crowd":
+        return "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+      default: // evacuate
+        return "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    }
+  }
 
   return (
-    <div style={{ flex: 3, minWidth: 0, position: 'relative' }}>
+    <div className="relative h-full w-full">
       <MapContainer
         id={MAP_ID}
         center={defaultCenter}
         zoom={13}
-        style={{ height: '100vh', width: '100%' }}
+        className="h-full w-full"
         scrollWheelZoom={true}
+        zoomControl={false}
+        ref={mapRef}
       >
         <TileLayer
-          attribution='&copy; OpenStreetMap contributors'
-          url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url={getMapStyle()}
         />
-        <MapView {...props} />
+        <ZoomControl position="bottomleft" />
+        <MapView {...props} mapRef={mapRef} />
       </MapContainer>
+
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000]"
+      >
+        <ModeSelector />
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="absolute top-4 left-4 z-[1000]"
+      >
+        <MapControls mapRef={mapRef} {...props} />
+      </motion.div>
+
       <Legend />
     </div>
-  );
-};
+  )
+}
 
-export default MapPanel;
+export default MapPanel
