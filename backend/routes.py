@@ -6,15 +6,33 @@ import time
 
 from flask import jsonify, request
 from .app import app
+from twilio.twiml.messaging_response import MessagingResponse
+import logging
 
 ORS_API_KEY = "5b3ce3597851110001cf62489b031f958d374401839da05f388b2306"
 ORS_BASE_URL = "https://api.openrouteservice.org/v2"
 TOMTOM_API_KEY = '9RMtR8Pfucbdaw93oeLv2XVFulo2Nkon'
+
 def register_routes(app):
 
     @app.route('/api/health', methods=['GET'])
     def health_check():
         return jsonify({'status': 'healthy'})
+    
+    @app.route('/whatsapp', methods=['POST'])
+    def whatsapp_reply():
+        incoming_msg = request.values.get("Body", "").lower()
+        response = MessagingResponse()
+        msg = response.message()
+
+        if "hi" in incoming_msg:
+            msg.body("Hello! 👋 This is your WhatsApp bot.")
+        elif "bye" in incoming_msg:
+            msg.body("Goodbye! 👋")
+        else:
+            msg.body("I'm not sure how to respond to that.")
+
+        return str(response)
 
     @app.route('/api/geocode', methods=['GET'])
     def geocode():
